@@ -57,8 +57,12 @@ public class SyntaxJsonConverter : JsonConverter<SyntaxNode>
                     writer.WriteStringValue(str.Replace("\"", "\\\""));
                     break;
 
-                default:
+                case object obj when obj.GetType().IsEnum:
+                    writer.WriteStringValue(obj.ToString());
                     break;
+
+                default:
+                    throw new NotSupportedException($"Unsupported member type: {member.Value.GetType().Name}");
             }
         }
 
