@@ -26,9 +26,15 @@ public partial class OnlineJudgeAdapterTests
     }
 
     [DebuggerHidden]
+    private void AssertNodes(IEnumerable<VirtualNode> actual, params VirtualNode[] expected)
+    {
+        Assert.That(actual, Is.EqualTo(expected), $"Expected: {string.Join(", ", expected)}\nActual: {string.Join(", ", actual)}");
+    }
+
+    [DebuggerHidden]
     private void AssertNodes(OnlineJudgeOutput? output, params VirtualNode[] expected)
     {
         var actual = output?.Lines.OfType<VirtualNode>().ToArray() ?? Array.Empty<VirtualNode>();
-        Assert.That(actual, Is.EqualTo(expected), $"Expected: {string.Join(", ", expected)}\nActual: {string.Join(", ", actual)}");
+        AssertNodes(actual, expected);
     }
 }

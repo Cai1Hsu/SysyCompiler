@@ -161,6 +161,8 @@ public partial class OnlineJudgeAdapterTests
             // Operand: a
             VirtualNode.LVal,
             VirtualNode.PrimaryExp,
+            VirtualNode.UnaryExp, // the identifier 'a' also generates a UnaryExp
+            // The whole unary expression
             VirtualNode.UnaryExp,
             VirtualNode.MulExp,
             VirtualNode.AddExp,
@@ -214,6 +216,7 @@ public partial class OnlineJudgeAdapterTests
             VirtualNode.Number,
             VirtualNode.PrimaryExp,
             VirtualNode.UnaryExp,
+            VirtualNode.UnaryExp,
             VirtualNode.MulExp,
             VirtualNode.AddExp,
             VirtualNode.RelExp,
@@ -226,7 +229,7 @@ public partial class OnlineJudgeAdapterTests
         var condIndex = Array.IndexOf(virtNodes, VirtualNode.Cond);
         var beforeCond = virtNodes.Take(condIndex).Reverse().Take(expected.Length).Reverse().ToArray();
 
-        Assert.That(beforeCond, Is.EqualTo(expected));
+        AssertNodes(beforeCond, expected);
     }
 
 
