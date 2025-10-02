@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using SysyCompiler.Frontend.Syntax;
@@ -59,7 +58,6 @@ public class SyntaxJsonConverter : JsonConverter<SyntaxNode>
                     break;
 
                 default:
-                    JsonSerializer.Serialize(writer, member.Value, member.Value.GetType(), options);
                     break;
             }
         }

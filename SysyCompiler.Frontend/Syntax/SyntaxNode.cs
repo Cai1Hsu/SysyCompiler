@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SysyCompiler.Frontend.Tokenization;
 
 namespace SysyCompiler.Frontend.Syntax;
 
@@ -31,7 +32,7 @@ public abstract class SyntaxNode
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
+        Converters = { new JsonStringEnumConverter<SyntaxKind>(), new JsonStringEnumConverter<TokenKind>() },
     };
 
     public override string ToString()
