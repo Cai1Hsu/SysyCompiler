@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.IO;
 using SysyCompiler.Frontend;
 using SysyCompiler.Frontend.Syntax;
 using SysyCompiler.Frontend.Tokenization;

@@ -239,22 +239,18 @@ public static class TokenKindExtensions
     }
 
     public static TokenKind? ParseKeyword(ReadOnlySpan<char> text)
-        => keywordsLookup.TryGetValue(text, out var kind) ? kind : null;
+        => keywordsMap.TryGetValue(text.ToString(), out var kind) ? kind : null;
 
     public static TokenKind? ParseOperator(ReadOnlySpan<char> text)
-        => operatorsLookup.TryGetValue(text, out var kind) ? kind : null;
+        => operatorsMap.TryGetValue(text.ToString(), out var kind) ? kind : null;
 
     public static TokenKind? ParsePunctuation(ReadOnlySpan<char> text)
-        => punctuationsLookup.TryGetValue(text, out var kind) ? kind : null;
+        => punctuationsMap.TryGetValue(text.ToString(), out var kind) ? kind : null;
 
     private static readonly FrozenDictionary<string, TokenKind> keywordsMap;
-    private static readonly FrozenDictionary<string, TokenKind>.AlternateLookup<ReadOnlySpan<char>> keywordsLookup;
-
     private static readonly FrozenDictionary<string, TokenKind> operatorsMap;
-    private static readonly FrozenDictionary<string, TokenKind>.AlternateLookup<ReadOnlySpan<char>> operatorsLookup;
 
     private static readonly FrozenDictionary<string, TokenKind> punctuationsMap;
-    private static readonly FrozenDictionary<string, TokenKind>.AlternateLookup<ReadOnlySpan<char>> punctuationsLookup;
 
     private static readonly FrozenDictionary<TokenKind, string> fixedTokenText;
 
@@ -321,7 +317,6 @@ public static class TokenKindExtensions
             };
 
             keywordsMap = builder.ToFrozenDictionary();
-            keywordsLookup = keywordsMap.GetAlternateLookup<ReadOnlySpan<char>>();
 
             builder = new Dictionary<string, TokenKind>(StringComparer.InvariantCulture)
             {
@@ -347,7 +342,6 @@ public static class TokenKindExtensions
             };
 
             operatorsMap = builder.ToFrozenDictionary();
-            operatorsLookup = operatorsMap.GetAlternateLookup<ReadOnlySpan<char>>();
 
             builder = new Dictionary<string, TokenKind>(StringComparer.InvariantCulture)
             {
@@ -363,7 +357,6 @@ public static class TokenKindExtensions
             };
 
             punctuationsMap = builder.ToFrozenDictionary();
-            punctuationsLookup = punctuationsMap.GetAlternateLookup<ReadOnlySpan<char>>();
         }
     }
 }
