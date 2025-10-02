@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysyCompiler.Frontend.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysyCompiler.Analyzer", "SysyCompiler.Analyzer\SysyCompiler.Analyzer.csproj", "{21D90D92-16B3-41F6-8B2C-CD55AE526276}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysyCompiler.Analyzer.Tests", "SysyCompiler.Analyzer.Tests\SysyCompiler.Analyzer.Tests.csproj", "{C1FE193D-EF1A-4E78-998B-9BAC28BC9680}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysyCompiler", "SysyCompiler\SysyCompiler.csproj", "{7DB385D3-C825-4721-8BA3-314BAFCD15F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{21D90D92-16B3-41F6-8B2C-CD55AE526276}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21D90D92-16B3-41F6-8B2C-CD55AE526276}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21D90D92-16B3-41F6-8B2C-CD55AE526276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1FE193D-EF1A-4E78-998B-9BAC28BC9680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1FE193D-EF1A-4E78-998B-9BAC28BC9680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1FE193D-EF1A-4E78-998B-9BAC28BC9680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1FE193D-EF1A-4E78-998B-9BAC28BC9680}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DB385D3-C825-4721-8BA3-314BAFCD15F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DB385D3-C825-4721-8BA3-314BAFCD15F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DB385D3-C825-4721-8BA3-314BAFCD15F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DB385D3-C825-4721-8BA3-314BAFCD15F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
