@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
-    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
