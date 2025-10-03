@@ -144,6 +144,42 @@ int calculate(int x, int y) {
     }
 
     [Test]
+    public void ParseFunctionDeclaration_MissingCloseParen_RecoversAndParsesNextMember()
+    {
+        const string source = """
+// missing close paren after `b`
+int sum(int a, int b {
+    return a + b;
+}
+
+int identity(int value) {
+    return value;
+}
+""";
+        var parser = CreateParser(source);
+        var compilationUnit = parser.ParseCompilationUnit();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(compilationUnit.Members.Count, Is.EqualTo(2), "Should parse both function declarations");
+
+            var sumFunction = compilationUnit.Members[0] as FunctionDeclarationSyntax;
+            Assert.That(sumFunction, Is.Not.Null);
+            Assert.That(sumFunction!.Identifier.Text, Is.EqualTo("sum"));
+            Assert.That(sumFunction.CloseParenToken, Is.Null, "Close paren should be optional");
+            Assert.That(sumFunction.ParameterList, Is.Not.Null);
+            Assert.That(sumFunction.ParameterList!.Items.Count, Is.EqualTo(2));
+            Assert.That(sumFunction.Body.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(sumFunction.Body.Statements.Count, Is.EqualTo(1));
+
+            var identityFunction = compilationUnit.Members[1] as FunctionDeclarationSyntax;
+            Assert.That(identityFunction, Is.Not.Null);
+            Assert.That(identityFunction!.Identifier.Text, Is.EqualTo("identity"));
+            Assert.That(identityFunction.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
+        });
+    }
+
+    [Test]
     public void ParseNestedExpression_ParseCorrectly()
     {
         const string source = "a()[1](0) + 1";
@@ -320,6 +356,39 @@ int calculate(int x, int y) {
     }
 
     [Test]
+    public void ParseFunctionCall_MissingCloseParen_AllowsFollowingStatements()
+    {
+        const string source = """
+{
+    foo(1; // missing close paren
+    bar();
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2), "Block should contain both statements");
+
+            var firstStatement = block.Statements[0] as ExpressionStatementSyntax;
+            Assert.That(firstStatement, Is.Not.Null);
+            var firstCall = firstStatement!.Expression as FunctionCallExpressionSyntax;
+            Assert.That(firstCall, Is.Not.Null);
+            Assert.That(firstCall!.CloseParenToken, Is.Null, "Function call should allow missing close paren");
+
+            var secondStatement = block.Statements[1] as ExpressionStatementSyntax;
+            Assert.That(secondStatement, Is.Not.Null);
+            var secondCall = secondStatement!.Expression as FunctionCallExpressionSyntax;
+            Assert.That(secondCall, Is.Not.Null);
+            Assert.That(secondCall!.Callee, Is.InstanceOf<ReferenceExpressionSyntax>());
+            var callee = (ReferenceExpressionSyntax)secondCall.Callee;
+            Assert.That(callee.Identifier.Text, Is.EqualTo("bar"));
+            Assert.That(secondCall!.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
+        });
+    }
+
+    [Test]
     public void ParseWhileStatement_DetailedStructure_ParsesCorrectly()
     {
         const string source = "while (i < count) { i = i + 1; }";
@@ -348,6 +417,46 @@ int calculate(int x, int y) {
             Assert.That(statement.Body, Is.InstanceOf<BlockStatementSyntax>());
             var blockStmt = (BlockStatementSyntax)statement.Body;
             Assert.That(blockStmt.Block.Statements.Count, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public void ParseIfStatement_MissingCloseParen_ParsesElseAndFollowingStatement()
+    {
+        const string source = """
+{
+    // missing close paren after expression `x > 0`
+    if (x > 0 {
+        return x;
+    } else {
+        return -x;
+    }
+    return 0;
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2));
+
+            var ifStatement = block.Statements[0] as IfStatementSyntax;
+            Assert.That(ifStatement, Is.Not.Null);
+            Assert.That(ifStatement!.CloseParenToken, Is.Null);
+            Assert.That(ifStatement.ThenStatement, Is.InstanceOf<BlockStatementSyntax>());
+            Assert.That(ifStatement.ElseStatement, Is.InstanceOf<BlockStatementSyntax>());
+
+            var thenBlock = (BlockStatementSyntax)ifStatement.ThenStatement;
+            Assert.That(thenBlock.Block.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(thenBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var elseBlock = (BlockStatementSyntax)ifStatement.ElseStatement!;
+            Assert.That(elseBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var trailingReturn = block.Statements[1] as ReturnStatementSyntax;
+            Assert.That(trailingReturn, Is.Not.Null);
+            Assert.That(trailingReturn!.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
         });
     }
 
@@ -392,6 +501,40 @@ int main() {
             // Second statement should be return statement
             var secondStmt = mainFunc.Body.Statements[1];
             Assert.That(secondStmt, Is.InstanceOf<ReturnStatementSyntax>());
+        });
+    }
+
+    [Test]
+    public void ParseWhileStatement_MissingCloseParen_ParsesBodyAndFollowingStatement()
+    {
+        const string source = """
+{
+    // missing close paren after expression `i < count`
+    while (i < count {
+        i = i + 1;
+    }
+    sum = sum + i;
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2));
+
+            var whileStatement = block.Statements[0] as WhileStatementSyntax;
+            Assert.That(whileStatement, Is.Not.Null);
+            Assert.That(whileStatement!.CloseParenToken, Is.Null);
+            Assert.That(whileStatement.Body, Is.InstanceOf<BlockStatementSyntax>());
+
+            var bodyBlock = (BlockStatementSyntax)whileStatement.Body;
+            Assert.That(bodyBlock.Block.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(bodyBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var trailingExpression = block.Statements[1] as ExpressionStatementSyntax;
+            Assert.That(trailingExpression, Is.Not.Null);
+            Assert.That(trailingExpression!.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
         });
     }
 }
