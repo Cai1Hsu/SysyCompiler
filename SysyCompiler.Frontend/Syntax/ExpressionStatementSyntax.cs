@@ -6,9 +6,9 @@ public class ExpressionStatementSyntax : StatementSyntax
     public ExpressionSyntax Expression { get; }
 
     [SyntaxMember]
-    public SyntaxToken SemicolonToken { get; }
+    public SyntaxToken? SemicolonToken { get; }
 
-    public ExpressionStatementSyntax(ExpressionSyntax expression, SyntaxToken semicolonToken)
+    public ExpressionStatementSyntax(ExpressionSyntax expression, SyntaxToken? semicolonToken)
     {
         Expression = expression;
         SemicolonToken = semicolonToken;

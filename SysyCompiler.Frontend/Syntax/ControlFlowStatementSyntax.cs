@@ -4,9 +4,9 @@ public class ControlFlowStatementSyntax : StatementSyntax
 {
     public SyntaxToken ControlFlowToken { get; }
 
-    public SyntaxToken SemicolonToken { get; }
+    public SyntaxToken? SemicolonToken { get; }
 
-    public ControlFlowStatementSyntax(SyntaxToken controlFlowToken, SyntaxToken semicolonToken)
+    public ControlFlowStatementSyntax(SyntaxToken controlFlowToken, SyntaxToken? semicolonToken)
     {
         ControlFlowToken = controlFlowToken;
         SemicolonToken = semicolonToken;

@@ -9,9 +9,9 @@ public class ReturnStatementSyntax : StatementSyntax
     public ExpressionSyntax? Expression { get; }
 
     [SyntaxMember]
-    public SyntaxToken SemicolonToken { get; }
+    public SyntaxToken? SemicolonToken { get; }
 
-    public ReturnStatementSyntax(SyntaxToken returnKeyword, ExpressionSyntax? expression, SyntaxToken semicolonToken)
+    public ReturnStatementSyntax(SyntaxToken returnKeyword, ExpressionSyntax? expression, SyntaxToken? semicolonToken)
     {
         ReturnKeyword = returnKeyword;
         Expression = expression;

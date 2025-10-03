@@ -377,7 +377,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
         if (!Source.IsMatch(0, TokenKind.Semicolon))
             expression = ParseExpression();
 
-        SyntaxToken semicolonToken = ParseToken(TokenKind.Semicolon);
+        SyntaxToken? semicolonToken = ParseNullableToken(TokenKind.Semicolon);
 
         return new ReturnStatementSyntax(
             returnToken,
@@ -418,7 +418,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
     public ExpressionStatementSyntax ParseExpressionStatement()
     {
         ExpressionSyntax expression = ParseExpression();
-        SyntaxToken semicolonToken = ParseToken(TokenKind.Semicolon);
+        SyntaxToken? semicolonToken = ParseNullableToken(TokenKind.Semicolon);
 
         return new ExpressionStatementSyntax(expression, semicolonToken);
     }
@@ -465,7 +465,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
     public ControlFlowStatementSyntax ParseControlFlowStatement()
     {
         SyntaxToken controlFlowToken = ParseToken(TokenKind.Break, TokenKind.Continue);
-        SyntaxToken semicolonToken = ParseToken(TokenKind.Semicolon);
+        SyntaxToken? semicolonToken = ParseNullableToken(TokenKind.Semicolon);
 
         return new ControlFlowStatementSyntax(controlFlowToken, semicolonToken);
     }
