@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using SysyCompiler.Frontend;
 using SysyCompiler.Frontend.Syntax;
 using SysyCompiler.Frontend.Tokenization;
 
@@ -8,11 +9,11 @@ public partial class OnlineJudgeAdapter
 {
     public (VirtualExprKind, VirtualExprKind?) GetVirtualExprBaseline(VirtualExprKind expected, VirtualExprKind? upperbound = null)
     {
-        var node = (ExpressionSyntax?)Peek();
+        var node = (ExpressionSyntax?) this.Peek();
 
         Debug.Assert(node is not null, "GetVirtExprBaseline should only be called when the current node is an ExpressionSyntax");
 
-        var parent = Peek(1);
+        var parent = this.Peek(1);
 
         switch (parent)
         {
@@ -27,12 +28,12 @@ public partial class OnlineJudgeAdapter
                 var baseLine = expected.Max(VirtualExprKind.Exp);
 
                 // If inside array dimension of a variable declaration, treat as ConstExp
-                if (GetClosest<VariableDefineSyntax>() is VariableDefineSyntax varDecl
+                if (this.GetClosest<VariableDefineSyntax>() is VariableDefineSyntax varDecl
                     && varDecl.ArrayDimensions?.Any(dim => ReferenceEquals(dim, parent)) is true)
                     baseLine = VirtualExprKind.ConstExp;
 
                 // If inside parameter list, treat as ConstExp
-                if (GetClosest<ParameterItemSyntax>() is ParameterItemSyntax parameterItem
+                if (this.GetClosest<ParameterItemSyntax>() is ParameterItemSyntax parameterItem
                     && parameterItem.ArrayDimensions?.Any(dim => ReferenceEquals(dim, parent)) is true)
                     baseLine = VirtualExprKind.ConstExp;
 
@@ -173,7 +174,7 @@ public partial class OnlineJudgeAdapter
     {
         list = base.VisitReferenceExpression(node, list);
 
-        var parent = Peek(1);
+        var parent = this.Peek(1);
 
         if (parent is FunctionCallExpressionSyntax || parent is ArrayExpressionSyntax)
             return list;
@@ -202,7 +203,7 @@ public partial class OnlineJudgeAdapter
     {
         list = base.VisitArrayExpression(node, list);
 
-        var parent = Peek(1);
+        var parent = this.Peek(1);
 
         if (parent is FunctionCallExpressionSyntax || parent is ArrayExpressionSyntax)
             return list;

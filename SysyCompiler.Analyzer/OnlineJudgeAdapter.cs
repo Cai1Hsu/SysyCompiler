@@ -89,7 +89,7 @@ public partial class OnlineJudgeAdapter : StackSyntaxVisitor<OnlineJudgeOutput>
         list = base.VisitType(node, list);
 
         // Don't output <BType> for main function's return type
-        if (Peek(1) is FunctionDeclarationSyntax func)
+        if (this.Peek(1) is FunctionDeclarationSyntax func)
         {
             if (!IsMain(func))
                 list?.AddNode(VirtualNode.FuncType);
@@ -209,7 +209,7 @@ public partial class OnlineJudgeAdapter : StackSyntaxVisitor<OnlineJudgeOutput>
 
     private bool IsInConstContext()
     {
-        var varDecl = GetClosest<VariableDeclarationSyntax>();
+        var varDecl = this.GetClosest<VariableDeclarationSyntax>();
         return varDecl?.Modifier?.Token.TokenKind is TokenKind.Const;
     }
 
@@ -243,7 +243,7 @@ public partial class OnlineJudgeAdapter : StackSyntaxVisitor<OnlineJudgeOutput>
         list = base.VisitArgumentList(node, list);
 
         if (node.Items.Count > 0
-            && GetClosest<FunctionCallExpressionSyntax>()
+            && this.GetClosest<FunctionCallExpressionSyntax>()
                 is FunctionCallExpressionSyntax funcCallExpr
             && !IsGetintOrPrintf(funcCallExpr))
             list?.AddNode(VirtualNode.FuncRParams);

@@ -1,4 +1,5 @@
 using System.Text;
+using SysyCompiler.Frontend;
 using SysyCompiler.Frontend.Syntax;
 using SysyCompiler.Frontend.Tokenization;
 using static SysyCompiler.Analyzer.OnlineJudgeAdapter;
@@ -40,13 +41,13 @@ public partial class OnlineJudgeAdapter
             return;
 
         // Numeric Literal
-        if (Peek() is LiteralExpressionSyntax literalExpr
+        if (this.Peek() is LiteralExpressionSyntax literalExpr
             && literalExpr.Token.TokenKind is TokenKind.BinaryIntLiteral
                 or TokenKind.OctalIntLiteral
                 or TokenKind.DecimalIntLiteral
                 or TokenKind.HexIntLiteral)
             list?.AddNode(VirtualNode.Number);
-        else if (Peek() is ArrayExpressionSyntax or ReferenceExpressionSyntax)
+        else if (this.Peek() is ArrayExpressionSyntax or ReferenceExpressionSyntax)
             GenerateLVal(list, upperbound);
 
         list?.AddNode(VirtualNode.PrimaryExp);
@@ -58,7 +59,7 @@ public partial class OnlineJudgeAdapter
             && upper > VirtualExprKind.UnaryExp)
             return;
 
-        if (Peek() is not FunctionCallExpressionSyntax)
+        if (this.Peek() is not FunctionCallExpressionSyntax)
             GeneratePrimaryExp(list, upperbound);
 
         list?.AddNode(VirtualNode.UnaryExp);
