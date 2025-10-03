@@ -104,7 +104,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken identifier = ParseToken(TokenKind.Identifier);
         SyntaxToken openParenToken = ParseToken(TokenKind.LeftParen);
         ParameterListSyntax? parameterList = ParseParameterList();
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
         BlockSyntax body = ParseBlock();
 
         return new FunctionDeclarationSyntax(
@@ -129,7 +129,10 @@ public partial class RecursiveDescentParser : ISyntaxParser
     {
         var parameters = ImmutableArray.CreateBuilder<ParameterItemSyntax>();
 
-        if (Source.HasToken() && !Source.IsMatch(0, TokenKind.RightParen))
+        if (Source.HasToken() && (
+            Source.IsMatch(0, TokenKind.RightParen) || // close immediately if found right paren
+            // the list may not be closed with right paren(syntax error)
+            Source.IsMatch(0, TokenKind.Identifier, TokenKind.Int, TokenKind.Char, TokenKind.Void, TokenKind.Const)))
         {
             do
             {
