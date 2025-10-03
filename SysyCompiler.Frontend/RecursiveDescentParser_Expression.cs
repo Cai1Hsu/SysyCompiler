@@ -13,7 +13,7 @@ public partial class RecursiveDescentParser
 
         ArgumentListSyntax argumentList = ParseArgumentList();
 
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
 
         return new FunctionCallExpressionSyntax(
             callee,
@@ -188,7 +188,13 @@ public partial class RecursiveDescentParser
                 break;
             }
 
-            var operatorToken = ParseBinaryOperatorSyntax()!;
+            // Close grouped expression
+            if (Source.IsMatch(0, TokenKind.RightParen))
+                break;
+
+            // This usually indicates the end of an expression
+            if (ParseBinaryOperatorSyntax() is not BinaryOperatorSyntax operatorToken)
+                break;
 
             if (info.IsRightAssociative)
             {

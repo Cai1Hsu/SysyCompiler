@@ -104,7 +104,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken identifier = ParseToken(TokenKind.Identifier);
         SyntaxToken openParenToken = ParseToken(TokenKind.LeftParen);
         ParameterListSyntax? parameterList = ParseParameterList();
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
         BlockSyntax body = ParseBlock();
 
         return new FunctionDeclarationSyntax(
@@ -129,7 +129,10 @@ public partial class RecursiveDescentParser : ISyntaxParser
     {
         var parameters = ImmutableArray.CreateBuilder<ParameterItemSyntax>();
 
-        if (Source.HasToken() && !Source.IsMatch(0, TokenKind.RightParen))
+        if (Source.HasToken() && !Source.IsMatch(0, TokenKind.RightParen) // close immediately if found right paren
+
+            // the list may not be closed with right paren(syntax error)
+            && Source.IsMatch(0, TokenKind.Identifier, TokenKind.Int, TokenKind.Char, TokenKind.Void, TokenKind.Const))
         {
             do
             {
@@ -169,10 +172,13 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken leftBracketToken = ParseToken(TokenKind.LeftBracket);
 
         ExpressionSyntax? expression = null;
-        if (!Source.IsMatch(0, TokenKind.RightBracket))
+        if (!Source.IsMatch(0, TokenKind.RightBracket, // definitely close
+            TokenKind.LeftBracket, TokenKind.LeftBrace, // definitely close, but missing right bracket
+            TokenKind.Comma, TokenKind.Semicolon,
+            TokenKind.RightParen, TokenKind.RightBrace)) // TODO: keywords also indicates the missing close bracket
             expression = ParseExpression();
 
-        SyntaxToken rightBracketToken = ParseToken(TokenKind.RightBracket);
+        SyntaxToken? rightBracketToken = ParseNullableToken(TokenKind.RightBracket);
 
         return new ArrayDimensionSyntax(
             leftBracketToken,
@@ -298,7 +304,14 @@ public partial class RecursiveDescentParser : ISyntaxParser
     {
         var arguments = ImmutableArray.CreateBuilder<ArgumentItemSyntax>();
 
-        if (Source.HasToken() && !Source.IsMatch(0, TokenKind.RightParen))
+        if (Source.HasToken() && !Source.IsMatch(0, TokenKind.RightParen) // try to close empty list as early as possible
+            && Source.IsMatch(0, TokenKind.Identifier, // reference
+                TokenKind.LeftParen, // grouped expression
+                TokenKind.Bang, TokenKind.Plus, TokenKind.Minus, // unary expression
+
+                // literal expression
+                TokenKind.DecimalIntLiteral, TokenKind.HexIntLiteral, TokenKind.OctalIntLiteral, TokenKind.BinaryIntLiteral,
+                TokenKind.StringLiteral, TokenKind.CharLiteral))
         {
             do
             {

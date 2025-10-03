@@ -80,7 +80,7 @@ public class RecursiveDescentParserTests
             // Check first dimension [10]
             var firstDim = define.ArrayDimensions?[0];
             Assert.That(firstDim?.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
-            Assert.That(firstDim?.RightBracketToken.TokenKind, Is.EqualTo(TokenKind.RightBracket));
+            Assert.That(firstDim?.RightBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
             Assert.That(firstDim?.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
 
             var firstSize = (LiteralExpressionSyntax)firstDim?.Expression!;
@@ -91,6 +91,81 @@ public class RecursiveDescentParserTests
             Assert.That(secondDim?.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
             var secondSize = (LiteralExpressionSyntax)secondDim?.Expression!;
             Assert.That(secondSize.Token.Text, Is.EqualTo("20"));
+        });
+    }
+
+    [Test]
+    public void ParseArrayDeclaration_MissingRightBracket_ExpressionPreservedAndFollowingMemberParsed()
+    {
+        const string source = """
+// first declaration is missing closing right bracket
+int buffer[10;
+int other = 1;
+""";
+        var parser = CreateParser(source);
+        var unit = parser.ParseCompilationUnit();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(unit.Members.Count, Is.EqualTo(2));
+
+            var bufferDeclaration = unit.Members[0] as VariableDeclarationSyntax;
+            Assert.That(bufferDeclaration, Is.Not.Null);
+            var bufferDefine = bufferDeclaration!.VariableDefine;
+            Assert.That(bufferDefine, Is.Not.Null);
+            Assert.That(bufferDefine!.ArrayDimensions, Is.Not.Null);
+            Assert.That(bufferDefine.ArrayDimensions!.Count, Is.EqualTo(1));
+
+            var dimension = bufferDefine.ArrayDimensions![0];
+            Assert.That(dimension.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
+            Assert.That(dimension.RightBracketToken, Is.Null, "Right bracket token should be nullable when missing");
+            Assert.That(dimension.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
+            var lengthLiteral = (LiteralExpressionSyntax)dimension.Expression!;
+            Assert.That(lengthLiteral.Token.TokenKind, Is.EqualTo(TokenKind.DecimalIntLiteral));
+            Assert.That(lengthLiteral.Token.Text, Is.EqualTo("10"));
+
+            var otherDeclaration = unit.Members[1] as VariableDeclarationSyntax;
+            Assert.That(otherDeclaration, Is.Not.Null);
+            Assert.That(otherDeclaration!.VariableDefine!.Identifier.Text, Is.EqualTo("other"));
+            Assert.That(otherDeclaration.VariableDefine.Initializer, Is.InstanceOf<ExpressionInitializerSyntax>());
+            var otherInitializer = (ExpressionInitializerSyntax)otherDeclaration.VariableDefine.Initializer!;
+            Assert.That(otherInitializer.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
+            var otherLiteral = (LiteralExpressionSyntax)otherInitializer.Expression!;
+            Assert.That(otherLiteral.Token.Text, Is.EqualTo("1"), "Subsequent declarations should remain unaffected");
+        });
+    }
+
+    [Test]
+    public void ParseArrayDeclaration_MissingRightBracketWithoutExpression_AllowsSubsequentMembers()
+    {
+        const string source = """
+// first declaration has empty dimension without closing bracket
+int emptyDim[;
+int value = 2;
+""";
+        var parser = CreateParser(source);
+        var unit = parser.ParseCompilationUnit();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(unit.Members.Count, Is.EqualTo(2));
+
+            var emptyDimDeclaration = unit.Members[0] as VariableDeclarationSyntax;
+            Assert.That(emptyDimDeclaration, Is.Not.Null);
+            var emptyDimDefine = emptyDimDeclaration!.VariableDefine;
+            Assert.That(emptyDimDefine, Is.Not.Null);
+            Assert.That(emptyDimDefine!.ArrayDimensions, Is.Not.Null);
+            Assert.That(emptyDimDefine.ArrayDimensions!.Count, Is.EqualTo(1));
+
+            var dimension = emptyDimDefine.ArrayDimensions![0];
+            Assert.That(dimension.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
+            Assert.That(dimension.Expression, Is.Null, "Dimension expression should be null when omitted");
+            Assert.That(dimension.RightBracketToken, Is.Null);
+
+            var valueDeclaration = unit.Members[1] as VariableDeclarationSyntax;
+            Assert.That(valueDeclaration, Is.Not.Null);
+            Assert.That(valueDeclaration!.VariableDefine!.Identifier.Text, Is.EqualTo("value"));
+            Assert.That(valueDeclaration.VariableDefine.Initializer, Is.InstanceOf<ExpressionInitializerSyntax>());
         });
     }
 
@@ -111,7 +186,7 @@ int calculate(int x, int y) {
             Assert.That(function.ReturnType.Token.Text, Is.EqualTo("int"));
             Assert.That(function.Identifier.Text, Is.EqualTo("calculate"));
             Assert.That(function.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(function.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(function.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check parameters
             var paramList = function.ParameterList!;
@@ -140,6 +215,42 @@ int calculate(int x, int y) {
             var ret = (ReturnStatementSyntax)returnStmt;
             Assert.That(ret.ReturnKeyword.Text, Is.EqualTo("return"));
             Assert.That(ret.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
+        });
+    }
+
+    [Test]
+    public void ParseFunctionDeclaration_MissingCloseParen_RecoversAndParsesNextMember()
+    {
+        const string source = """
+// missing close paren after `b`
+int sum(int a, int b {
+    return a + b;
+}
+
+int identity(int value) {
+    return value;
+}
+""";
+        var parser = CreateParser(source);
+        var compilationUnit = parser.ParseCompilationUnit();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(compilationUnit.Members.Count, Is.EqualTo(2), "Should parse both function declarations");
+
+            var sumFunction = compilationUnit.Members[0] as FunctionDeclarationSyntax;
+            Assert.That(sumFunction, Is.Not.Null);
+            Assert.That(sumFunction!.Identifier.Text, Is.EqualTo("sum"));
+            Assert.That(sumFunction.CloseParenToken, Is.Null, "Close paren should be optional");
+            Assert.That(sumFunction.ParameterList, Is.Not.Null);
+            Assert.That(sumFunction.ParameterList!.Items.Count, Is.EqualTo(2));
+            Assert.That(sumFunction.Body.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(sumFunction.Body.Statements.Count, Is.EqualTo(1));
+
+            var identityFunction = compilationUnit.Members[1] as FunctionDeclarationSyntax;
+            Assert.That(identityFunction, Is.Not.Null);
+            Assert.That(identityFunction!.Identifier.Text, Is.EqualTo("identity"));
+            Assert.That(identityFunction.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
         });
     }
 
@@ -299,7 +410,7 @@ int calculate(int x, int y) {
             var callee = (ReferenceExpressionSyntax)expression.Callee;
             Assert.That(callee.Identifier.Text, Is.EqualTo("printf"));
             Assert.That(expression.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(expression.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(expression.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check arguments
             var args = expression.ArgumentList.Items;
@@ -316,6 +427,93 @@ int calculate(int x, int y) {
             Assert.That(secondArg.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
             var binaryExpr = (BinaryExpressionSyntax)secondArg.Expression;
             Assert.That(binaryExpr.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
+        });
+    }
+
+    [Test]
+    public void ParseFunctionCall_MissingCloseParen_AllowsFollowingStatements()
+    {
+        const string source = """
+{
+    foo(1; // missing close paren
+    bar();
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2), "Block should contain both statements");
+
+            var firstStatement = block.Statements[0] as ExpressionStatementSyntax;
+            Assert.That(firstStatement, Is.Not.Null);
+            var firstCall = firstStatement!.Expression as FunctionCallExpressionSyntax;
+            Assert.That(firstCall, Is.Not.Null);
+            Assert.That(firstCall!.CloseParenToken, Is.Null, "Function call should allow missing close paren");
+
+            var secondStatement = block.Statements[1] as ExpressionStatementSyntax;
+            Assert.That(secondStatement, Is.Not.Null);
+            var secondCall = secondStatement!.Expression as FunctionCallExpressionSyntax;
+            Assert.That(secondCall, Is.Not.Null);
+            Assert.That(secondCall!.Callee, Is.InstanceOf<ReferenceExpressionSyntax>());
+            var callee = (ReferenceExpressionSyntax)secondCall.Callee;
+            Assert.That(callee.Identifier.Text, Is.EqualTo("bar"));
+            Assert.That(secondCall!.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
+        });
+    }
+
+    [Test]
+    public void ParseArrayExpression_MissingRightBracket_KeepsBlockIntact()
+    {
+        const string source = """
+{
+    // index expression present, right bracket missing
+    head = data[1 + offset;
+    // index expression missing entirely, right bracket missing
+    tail = data[;
+    // control sample with complete index
+    sum = data[2] + 1;
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(3));
+
+            var firstStatement = block.Statements[0] as ExpressionStatementSyntax;
+            Assert.That(firstStatement, Is.Not.Null);
+            var firstAssignment = firstStatement!.Expression as BinaryExpressionSyntax;
+            Assert.That(firstAssignment, Is.Not.Null);
+            Assert.That(firstAssignment!.Operator.Token.TokenKind, Is.EqualTo(TokenKind.AssignEqual));
+            var firstArray = firstAssignment.Right as ArrayExpressionSyntax;
+            Assert.That(firstArray, Is.Not.Null, "Right-hand side should remain an array expression");
+            Assert.That(firstArray!.Index.RightBracketToken, Is.Null);
+            Assert.That(firstArray.Index.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
+            var indexBinary = (BinaryExpressionSyntax)firstArray.Index.Expression!;
+            Assert.That(indexBinary.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
+
+            var secondStatement = block.Statements[1] as ExpressionStatementSyntax;
+            Assert.That(secondStatement, Is.Not.Null);
+            var secondAssignment = secondStatement!.Expression as BinaryExpressionSyntax;
+            Assert.That(secondAssignment, Is.Not.Null);
+            var secondArray = secondAssignment!.Right as ArrayExpressionSyntax;
+            Assert.That(secondArray, Is.Not.Null);
+            Assert.That(secondArray!.Index.Expression, Is.Null, "Index expression should be null when omitted");
+            Assert.That(secondArray.Index.RightBracketToken, Is.Null);
+
+            var thirdStatement = block.Statements[2] as ExpressionStatementSyntax;
+            Assert.That(thirdStatement, Is.Not.Null);
+            var thirdAssignment = thirdStatement!.Expression as BinaryExpressionSyntax;
+            Assert.That(thirdAssignment, Is.Not.Null);
+            var thirdRight = thirdAssignment!.Right as BinaryExpressionSyntax;
+            Assert.That(thirdRight, Is.Not.Null);
+            Assert.That(thirdRight!.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
+            var thirdArray = thirdRight.Left as ArrayExpressionSyntax;
+            Assert.That(thirdArray, Is.Not.Null, "Complete index should still include right bracket");
+            Assert.That(thirdArray!.Index.RightBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
         });
     }
 
@@ -348,6 +546,46 @@ int calculate(int x, int y) {
             Assert.That(statement.Body, Is.InstanceOf<BlockStatementSyntax>());
             var blockStmt = (BlockStatementSyntax)statement.Body;
             Assert.That(blockStmt.Block.Statements.Count, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public void ParseIfStatement_MissingCloseParen_ParsesElseAndFollowingStatement()
+    {
+        const string source = """
+{
+    // missing close paren after expression `x > 0`
+    if (x > 0 {
+        return x;
+    } else {
+        return -x;
+    }
+    return 0;
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2));
+
+            var ifStatement = block.Statements[0] as IfStatementSyntax;
+            Assert.That(ifStatement, Is.Not.Null);
+            Assert.That(ifStatement!.CloseParenToken, Is.Null);
+            Assert.That(ifStatement.ThenStatement, Is.InstanceOf<BlockStatementSyntax>());
+            Assert.That(ifStatement.ElseStatement, Is.InstanceOf<BlockStatementSyntax>());
+
+            var thenBlock = (BlockStatementSyntax)ifStatement.ThenStatement;
+            Assert.That(thenBlock.Block.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(thenBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var elseBlock = (BlockStatementSyntax)ifStatement.ElseStatement!;
+            Assert.That(elseBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var trailingReturn = block.Statements[1] as ReturnStatementSyntax;
+            Assert.That(trailingReturn, Is.Not.Null);
+            Assert.That(trailingReturn!.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
         });
     }
 
@@ -392,6 +630,40 @@ int main() {
             // Second statement should be return statement
             var secondStmt = mainFunc.Body.Statements[1];
             Assert.That(secondStmt, Is.InstanceOf<ReturnStatementSyntax>());
+        });
+    }
+
+    [Test]
+    public void ParseWhileStatement_MissingCloseParen_ParsesBodyAndFollowingStatement()
+    {
+        const string source = """
+{
+    // missing close paren after expression `i < count`
+    while (i < count {
+        i = i + 1;
+    }
+    sum = sum + i;
+}
+""";
+        var parser = CreateParser(source);
+        var block = parser.ParseBlock();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(block.Statements.Count, Is.EqualTo(2));
+
+            var whileStatement = block.Statements[0] as WhileStatementSyntax;
+            Assert.That(whileStatement, Is.Not.Null);
+            Assert.That(whileStatement!.CloseParenToken, Is.Null);
+            Assert.That(whileStatement.Body, Is.InstanceOf<BlockStatementSyntax>());
+
+            var bodyBlock = (BlockStatementSyntax)whileStatement.Body;
+            Assert.That(bodyBlock.Block.OpenBraceToken.TokenKind, Is.EqualTo(TokenKind.LeftBrace));
+            Assert.That(bodyBlock.Block.Statements.Count, Is.EqualTo(1));
+
+            var trailingExpression = block.Statements[1] as ExpressionStatementSyntax;
+            Assert.That(trailingExpression, Is.Not.Null);
+            Assert.That(trailingExpression!.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
         });
     }
 }

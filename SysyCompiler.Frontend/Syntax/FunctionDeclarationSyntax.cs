@@ -15,7 +15,7 @@ public sealed class FunctionDeclarationSyntax : MemberDeclarationSyntax
     public ParameterListSyntax? ParameterList { get; }
 
     [SyntaxMember]
-    public SyntaxToken CloseParenToken { get; }
+    public SyntaxToken? CloseParenToken { get; }
 
     [SyntaxMember]
     public BlockSyntax Body { get; set; }
@@ -25,7 +25,7 @@ public sealed class FunctionDeclarationSyntax : MemberDeclarationSyntax
         SyntaxToken identifier,
         SyntaxToken openParenToken,
         ParameterListSyntax? parameterList,
-        SyntaxToken closeParenToken,
+        SyntaxToken? closeParenToken,
         BlockSyntax body)
     {
         ReturnType = returnType;
