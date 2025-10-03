@@ -43,6 +43,13 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
         return base.VisitFunctionDeclaration(node, val);
     }
 
+    public override T? VisitVariableDeclaration(VariableDeclarationSyntax node, T? val = default)
+    {
+        AnalyzeVariableDeclaration?.Invoke(node, this, Diagnostics);
+
+        return base.VisitVariableDeclaration(node, val);
+    }
+
     public override T? VisitVariableDefine(VariableDefineSyntax node, T? val = default)
     {
         var declaration = this.Peek(1) as VariableDeclarationSyntax // single define
@@ -50,7 +57,7 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
         if (declaration is VariableDeclarationSyntax variableDeclaration)
         {
-            AnalyzeVariableDeclaration?.Invoke((node, variableDeclaration), this, Diagnostics);
+            AnalyzeVariableDefine?.Invoke((node, variableDeclaration), this, Diagnostics);
         }
 
         return base.VisitVariableDefine(node, val);
@@ -99,12 +106,37 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitArrayDimension(ArrayDimensionSyntax node, T? val = default)
     {
+        AnalyzeArrayDimension?.Invoke(node, this, Diagnostics);
+
         return base.VisitArrayDimension(node, val);
+    }
+
+    public override T? VisitIfStatement(IfStatementSyntax node, T? val = default)
+    {
+        AnalyzeIfStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitIfStatement(node, val);
+    }
+
+    public override T? VisitWhileStatement(WhileStatementSyntax node, T? val = default)
+    {
+        AnalyzeWhileStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitWhileStatement(node, val);
+    }
+
+    public override T? VisitExpressionStatement(ExpressionStatementSyntax node, T? val = default)
+    {
+        AnalyzeExpressionStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitExpressionStatement(node, val);
     }
 
     public event AnalyzeHandler<FunctionDeclarationSyntax>? AnalyzeFunctionDeclaration;
 
-    public event AnalyzeHandler<(VariableDefineSyntax, VariableDeclarationSyntax)>? AnalyzeVariableDeclaration;
+    public event AnalyzeHandler<VariableDeclarationSyntax>? AnalyzeVariableDeclaration;
+
+    public event AnalyzeHandler<(VariableDefineSyntax, VariableDeclarationSyntax)>? AnalyzeVariableDefine;
 
     public event AnalyzeHandler<ReferenceExpressionSyntax>? AnalyzeReferenceUsage;
 
@@ -119,4 +151,10 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
     public event AnalyzeHandler<ReturnStatementSyntax>? AnalyzeReturnStatement;
 
     public event AnalyzeHandler<ArrayDimensionSyntax>? AnalyzeArrayDimension;
+
+    public event AnalyzeHandler<IfStatementSyntax>? AnalyzeIfStatement;
+
+    public event AnalyzeHandler<WhileStatementSyntax>? AnalyzeWhileStatement;
+
+    public event AnalyzeHandler<ExpressionStatementSyntax>? AnalyzeExpressionStatement;
 }
