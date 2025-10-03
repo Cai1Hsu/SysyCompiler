@@ -188,6 +188,10 @@ public partial class RecursiveDescentParser
                 break;
             }
 
+            // Close grouped expression
+            if (Source.IsMatch(0, TokenKind.RightParen))
+                break;
+
             var operatorToken = ParseBinaryOperatorSyntax()!;
 
             if (info.IsRightAssociative)
