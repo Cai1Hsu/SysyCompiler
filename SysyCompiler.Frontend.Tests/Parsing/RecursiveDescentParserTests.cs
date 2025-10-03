@@ -111,7 +111,7 @@ int calculate(int x, int y) {
             Assert.That(function.ReturnType.Token.Text, Is.EqualTo("int"));
             Assert.That(function.Identifier.Text, Is.EqualTo("calculate"));
             Assert.That(function.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(function.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(function.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check parameters
             var paramList = function.ParameterList!;
