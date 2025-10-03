@@ -172,10 +172,13 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken leftBracketToken = ParseToken(TokenKind.LeftBracket);
 
         ExpressionSyntax? expression = null;
-        if (!Source.IsMatch(0, TokenKind.RightBracket))
+        if (!Source.IsMatch(0, TokenKind.RightBracket, // definitely close
+            TokenKind.LeftBracket, TokenKind.LeftBrace, // definitely close, but missing right bracket
+            TokenKind.Comma, TokenKind.Semicolon,
+            TokenKind.RightParen, TokenKind.RightBrace)) // TODO: keywords also indicates the missing close bracket
             expression = ParseExpression();
 
-        SyntaxToken rightBracketToken = ParseToken(TokenKind.RightBracket);
+        SyntaxToken? rightBracketToken = ParseNullableToken(TokenKind.RightBracket);
 
         return new ArrayDimensionSyntax(
             leftBracketToken,

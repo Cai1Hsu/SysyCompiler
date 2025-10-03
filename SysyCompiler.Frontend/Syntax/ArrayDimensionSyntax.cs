@@ -9,11 +9,11 @@ public class ArrayDimensionSyntax : SyntaxNode
     public ExpressionSyntax? Expression { get; }
 
     [SyntaxMember]
-    public SyntaxToken RightBracketToken { get; }
+    public SyntaxToken? RightBracketToken { get; }
 
     public override SyntaxKind Kind => SyntaxKind.ArrayDimension;
 
-    public ArrayDimensionSyntax(SyntaxToken leftBracketToken, SyntaxToken rightBracketToken, ExpressionSyntax? expression = null)
+    public ArrayDimensionSyntax(SyntaxToken leftBracketToken, SyntaxToken? rightBracketToken, ExpressionSyntax? expression = null)
     {
         LeftBracketToken = leftBracketToken;
         RightBracketToken = rightBracketToken;
