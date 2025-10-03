@@ -129,8 +129,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
     {
         var parameters = ImmutableArray.CreateBuilder<ParameterItemSyntax>();
 
-        if (Source.HasToken() && (
-            Source.IsMatch(0, TokenKind.RightParen) || // close immediately if found right paren
+        if (Source.HasToken() && (!Source.IsMatch(0, TokenKind.RightParen) || // close immediately if found right paren
 
             // the list may not be closed with right paren(syntax error)
             Source.IsMatch(0, TokenKind.Identifier, TokenKind.Int, TokenKind.Char, TokenKind.Void, TokenKind.Const)))
