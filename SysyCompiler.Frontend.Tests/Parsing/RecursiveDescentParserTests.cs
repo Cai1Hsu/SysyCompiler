@@ -230,7 +230,7 @@ int calculate(int x, int y) {
             Assert.That(statement.Kind, Is.EqualTo(SyntaxKind.IfStatement));
             Assert.That(statement.IfKeyword.Text, Is.EqualTo("if"));
             Assert.That(statement.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(statement.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(statement.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check condition
             Assert.That(statement.Condition, Is.InstanceOf<BinaryExpressionSyntax>());
@@ -331,7 +331,7 @@ int calculate(int x, int y) {
             Assert.That(statement.Kind, Is.EqualTo(SyntaxKind.WhileStatement));
             Assert.That(statement.WhileKeyword.Text, Is.EqualTo("while"));
             Assert.That(statement.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(statement.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(statement.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check condition
             Assert.That(statement.Condition, Is.InstanceOf<BinaryExpressionSyntax>());

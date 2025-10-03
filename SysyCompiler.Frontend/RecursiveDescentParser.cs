@@ -345,7 +345,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken ifToken = ParseToken(TokenKind.If);
         SyntaxToken openParenToken = ParseToken(TokenKind.LeftParen);
         ExpressionSyntax condition = ParseExpression();
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
         StatementSyntax thenStatement = ParseStatement();
 
         SyntaxToken? elseToken = ParseNullableToken(TokenKind.Else);
@@ -387,7 +387,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
         SyntaxToken whileToken = ParseToken(TokenKind.While);
         SyntaxToken openParenToken = ParseToken(TokenKind.LeftParen);
         ExpressionSyntax condition = ParseExpression();
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
         StatementSyntax body = ParseStatement();
 
         return new WhileStatementSyntax(

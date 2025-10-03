@@ -12,7 +12,7 @@ public class WhileStatementSyntax : StatementSyntax
     public ExpressionSyntax Condition { get; }
 
     [SyntaxMember]
-    public SyntaxToken CloseParenToken { get; }
+    public SyntaxToken? CloseParenToken { get; }
 
     [SyntaxMember]
     public StatementSyntax Body { get; }
@@ -21,7 +21,7 @@ public class WhileStatementSyntax : StatementSyntax
         SyntaxToken whileKeyword,
         SyntaxToken openParenToken,
         ExpressionSyntax condition,
-        SyntaxToken closeParenToken,
+        SyntaxToken? closeParenToken,
         StatementSyntax body)
     {
         WhileKeyword = whileKeyword;

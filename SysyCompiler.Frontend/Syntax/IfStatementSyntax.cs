@@ -12,7 +12,7 @@ public class IfStatementSyntax : StatementSyntax
     public ExpressionSyntax Condition { get; }
 
     [SyntaxMember]
-    public SyntaxToken CloseParenToken { get; }
+    public SyntaxToken? CloseParenToken { get; }
 
     [SyntaxMember]
     public StatementSyntax ThenStatement { get; }
@@ -27,7 +27,7 @@ public class IfStatementSyntax : StatementSyntax
         SyntaxToken ifKeyword,
         SyntaxToken openParenToken,
         ExpressionSyntax condition,
-        SyntaxToken closeParenToken,
+        SyntaxToken? closeParenToken,
         StatementSyntax thenStatement,
         SyntaxToken? elseKeyword,
         StatementSyntax? elseStatement)
