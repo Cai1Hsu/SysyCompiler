@@ -6,7 +6,7 @@ namespace SysyCompiler.Analyzer.Semantic;
 
 public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 {
-    public delegate void AnalyzeHandler<TValue>(TValue info, SemanticDiagnosticCollector diagnostics, ISymbolAnalyzer analyzer);
+    public delegate void AnalyzeHandler<TValue>(TValue info, ISymbolAnalyzer analyzer, SemanticDiagnosticCollector diagnostics);
 
     public SemanticDiagnosticCollector Diagnostics { get; }
 
@@ -38,7 +38,7 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitFunctionDeclaration(FunctionDeclarationSyntax node, T? val = default)
     {
-        AnalyzeFunctionDeclaration?.Invoke(node, Diagnostics, this);
+        AnalyzeFunctionDeclaration?.Invoke(node, this, Diagnostics);
 
         return base.VisitFunctionDeclaration(node, val);
     }
@@ -50,7 +50,7 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
         if (declaration is VariableDeclarationSyntax variableDeclaration)
         {
-            AnalyzeVariableDeclaration?.Invoke((node, variableDeclaration), Diagnostics, this);
+            AnalyzeVariableDeclaration?.Invoke((node, variableDeclaration), this, Diagnostics);
         }
 
         return base.VisitVariableDefine(node, val);
@@ -58,41 +58,41 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitReferenceExpression(ReferenceExpressionSyntax node, T? val = default)
     {
-        AnalyzeReferenceUsage?.Invoke(node, Diagnostics, this);
+        AnalyzeReferenceUsage?.Invoke(node, this, Diagnostics);
         return base.VisitReferenceExpression(node, val);
     }
 
     public override T? VisitFunctionCallExpression(FunctionCallExpressionSyntax node, T? val = default)
     {
-        AnalyzeFunctionCall?.Invoke(node, Diagnostics, this);
+        AnalyzeFunctionCall?.Invoke(node, this, Diagnostics);
 
         return base.VisitFunctionCallExpression(node, val);
     }
 
     public override T? VisitControlFlowStatement(ControlFlowStatementSyntax node, T? val = default)
     {
-        AnalyzeControlFlowStatement?.Invoke(node, Diagnostics, this);
+        AnalyzeControlFlowStatement?.Invoke(node, this, Diagnostics);
 
         return base.VisitControlFlowStatement(node, val);
     }
 
     public override T? VisitLiteralExpression(LiteralExpressionSyntax node, T? val = default)
     {
-        AnalyzeLiteralExpression?.Invoke(node, Diagnostics, this);
+        AnalyzeLiteralExpression?.Invoke(node, this, Diagnostics);
 
         return base.VisitLiteralExpression(node, val);
     }
 
     public override T? VisitBinaryExpression(BinaryExpressionSyntax node, T? val = default)
     {
-        AnalyzeBinaryExpression?.Invoke(node, Diagnostics, this);
+        AnalyzeBinaryExpression?.Invoke(node, this, Diagnostics);
 
         return base.VisitBinaryExpression(node, val);
     }
 
     public override T? VisitReturnStatement(ReturnStatementSyntax node, T? val = default)
     {
-        AnalyzeReturnStatement?.Invoke(node, Diagnostics, this);
+        AnalyzeReturnStatement?.Invoke(node, this, Diagnostics);
 
         return base.VisitReturnStatement(node, val);
     }
