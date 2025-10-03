@@ -54,13 +54,13 @@ public abstract class SyntaxVisitor<T>
         {
             if (member.Value is SyntaxNode childNode)
             {
-                childNode.Accept(this, val);
+                val = childNode.Accept(this, val);
             }
             else if (member.Value is IEnumerable<SyntaxNode> nodeList)
             {
                 foreach (var item in nodeList)
                 {
-                    item.Accept(this, val);
+                    val = item.Accept(this, val);
                 }
             }
         }
