@@ -13,7 +13,7 @@ public partial class RecursiveDescentParser
 
         ArgumentListSyntax argumentList = ParseArgumentList();
 
-        SyntaxToken closeParenToken = ParseToken(TokenKind.RightParen);
+        SyntaxToken? closeParenToken = ParseNullableToken(TokenKind.RightParen);
 
         return new FunctionCallExpressionSyntax(
             callee,

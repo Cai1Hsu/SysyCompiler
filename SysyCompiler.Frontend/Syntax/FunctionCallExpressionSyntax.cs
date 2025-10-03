@@ -12,9 +12,9 @@ public class FunctionCallExpressionSyntax : ExpressionSyntax
     public ArgumentListSyntax ArgumentList { get; }
 
     [SyntaxMember]
-    public SyntaxToken CloseParenToken { get; }
+    public SyntaxToken? CloseParenToken { get; }
 
-    public FunctionCallExpressionSyntax(ExpressionSyntax callee, SyntaxToken openParenToken, ArgumentListSyntax argumentList, SyntaxToken closeParenToken)
+    public FunctionCallExpressionSyntax(ExpressionSyntax callee, SyntaxToken openParenToken, ArgumentListSyntax argumentList, SyntaxToken? closeParenToken)
     {
         Callee = callee;
         OpenParenToken = openParenToken;

@@ -299,7 +299,7 @@ int calculate(int x, int y) {
             var callee = (ReferenceExpressionSyntax)expression.Callee;
             Assert.That(callee.Identifier.Text, Is.EqualTo("printf"));
             Assert.That(expression.OpenParenToken.TokenKind, Is.EqualTo(TokenKind.LeftParen));
-            Assert.That(expression.CloseParenToken.TokenKind, Is.EqualTo(TokenKind.RightParen));
+            Assert.That(expression.CloseParenToken?.TokenKind, Is.EqualTo(TokenKind.RightParen));
 
             // Check arguments
             var args = expression.ArgumentList.Items;
