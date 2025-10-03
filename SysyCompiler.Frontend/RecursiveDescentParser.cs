@@ -189,16 +189,12 @@ public partial class RecursiveDescentParser : ISyntaxParser
         var defines = ImmutableArray.CreateBuilder<VariableDefineSyntax>();
         defines.Add(ParseVariableDefine());
 
-        if (!Source.IsMatch(0, TokenKind.Semicolon))
+        while (Source.HasToken() && defines.Last().CommaToken is not null)
         {
-            do
-            {
-                defines.Add(ParseVariableDefine());
-            }
-            while (Source.HasToken() && defines.Last().CommaToken is not null);
+            defines.Add(ParseVariableDefine());
         }
 
-        SyntaxToken semicolonToken = ParseToken(TokenKind.Semicolon);
+        SyntaxToken? semicolonToken = ParseNullableToken(TokenKind.Semicolon);
 
         var modifier = constToken is not null
             ? new ModifierSyntax(constToken)

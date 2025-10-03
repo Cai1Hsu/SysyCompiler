@@ -17,9 +17,9 @@ public class VariableDeclarationSyntax : MemberDeclarationSyntax
     private object define;
 
     [SyntaxMember]
-    public SyntaxToken SemicolonToken { get; }
+    public SyntaxToken? SemicolonToken { get; }
 
-    public VariableDeclarationSyntax(TypeSyntax type, VariableDefineSyntax variableDefine, SyntaxToken semicolonToken, ModifierSyntax? modifier = null)
+    public VariableDeclarationSyntax(TypeSyntax type, VariableDefineSyntax variableDefine, SyntaxToken? semicolonToken, ModifierSyntax? modifier = null)
     {
         Modifier = modifier;
         Type = type;
@@ -27,7 +27,7 @@ public class VariableDeclarationSyntax : MemberDeclarationSyntax
         SemicolonToken = semicolonToken;
     }
 
-    public VariableDeclarationSyntax(TypeSyntax type, SyntaxList<VariableDefineSyntax> variableDefines, SyntaxToken semicolonToken, ModifierSyntax? modifier = null)
+    public VariableDeclarationSyntax(TypeSyntax type, SyntaxList<VariableDefineSyntax> variableDefines, SyntaxToken? semicolonToken, ModifierSyntax? modifier = null)
     {
         Modifier = modifier;
         Type = type;

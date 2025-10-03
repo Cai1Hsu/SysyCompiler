@@ -233,7 +233,7 @@ public class RecursiveDescentParserTests_Expression : RecursiveDescentParserTest
             Assert.That(rightBinary.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
 
             // Semicolon should be the actual semicolon, not AssignEqual
-            Assert.That(statement.SemicolonToken.TokenKind, Is.EqualTo(TokenKind.Semicolon),
+            Assert.That(statement.SemicolonToken?.TokenKind, Is.EqualTo(TokenKind.Semicolon),
                 "Semicolon token should be Semicolon, not AssignEqual");
         });
     }
