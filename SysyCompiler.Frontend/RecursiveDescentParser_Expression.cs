@@ -192,7 +192,9 @@ public partial class RecursiveDescentParser
             if (Source.IsMatch(0, TokenKind.RightParen))
                 break;
 
-            var operatorToken = ParseBinaryOperatorSyntax()!;
+            // This usually indicates the end of an expression
+            if (ParseBinaryOperatorSyntax() is not BinaryOperatorSyntax operatorToken)
+                break;
 
             if (info.IsRightAssociative)
             {
