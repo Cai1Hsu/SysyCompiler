@@ -356,16 +356,14 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
             case ArrayExpressionSyntax arrayAccess:
                 var baseType = ResolveExpressionType(arrayAccess.Base, analyzer);
 
-                if (baseType is null || baseType.ArrayRank == 0)
+                if (baseType is not ArrayType arrayType || arrayType.ArrayRank == 0)
                     goto default; // not a array
 
-                if (baseType is ArrayType arrayType)
+                if (arrayType.ArrayRank == 1)
+                    return baseType; // unbox to element type
+                else
                     // flatten the array access
                     return new ArrayType(arrayType.ElementType, arrayType.ArrayRank - 1);
-                else if (baseType is ScalarType scalarType)
-                    return new ArrayType(scalarType, 0);
-                else
-                    goto default;
 
             case ReferenceExpressionSyntax referenceExpression
                 when referenceExpression.Identifier.Text is "getint":
