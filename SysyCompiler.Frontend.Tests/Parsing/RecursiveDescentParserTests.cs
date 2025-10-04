@@ -79,8 +79,8 @@ public class RecursiveDescentParserTests
 
             // Check first dimension [10]
             var firstDim = define.ArrayDimensions?[0];
-            Assert.That(firstDim?.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
-            Assert.That(firstDim?.RightBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
+            Assert.That(firstDim?.OpenBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
+            Assert.That(firstDim?.CloseBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
             Assert.That(firstDim?.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
 
             var firstSize = (LiteralExpressionSyntax)firstDim?.Expression!;
@@ -117,8 +117,8 @@ int other = 1;
             Assert.That(bufferDefine.ArrayDimensions!.Count, Is.EqualTo(1));
 
             var dimension = bufferDefine.ArrayDimensions![0];
-            Assert.That(dimension.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
-            Assert.That(dimension.RightBracketToken, Is.Null, "Right bracket token should be nullable when missing");
+            Assert.That(dimension.OpenBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
+            Assert.That(dimension.CloseBracketToken, Is.Null, "Right bracket token should be nullable when missing");
             Assert.That(dimension.Expression, Is.InstanceOf<LiteralExpressionSyntax>());
             var lengthLiteral = (LiteralExpressionSyntax)dimension.Expression!;
             Assert.That(lengthLiteral.Token.TokenKind, Is.EqualTo(TokenKind.DecimalIntLiteral));
@@ -158,9 +158,9 @@ int value = 2;
             Assert.That(emptyDimDefine.ArrayDimensions!.Count, Is.EqualTo(1));
 
             var dimension = emptyDimDefine.ArrayDimensions![0];
-            Assert.That(dimension.LeftBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
+            Assert.That(dimension.OpenBracketToken.TokenKind, Is.EqualTo(TokenKind.LeftBracket));
             Assert.That(dimension.Expression, Is.Null, "Dimension expression should be null when omitted");
-            Assert.That(dimension.RightBracketToken, Is.Null);
+            Assert.That(dimension.CloseBracketToken, Is.Null);
 
             var valueDeclaration = unit.Members[1] as VariableDeclarationSyntax;
             Assert.That(valueDeclaration, Is.Not.Null);
@@ -490,7 +490,7 @@ int identity(int value) {
             Assert.That(firstAssignment!.Operator.Token.TokenKind, Is.EqualTo(TokenKind.AssignEqual));
             var firstArray = firstAssignment.Right as ArrayExpressionSyntax;
             Assert.That(firstArray, Is.Not.Null, "Right-hand side should remain an array expression");
-            Assert.That(firstArray!.Index.RightBracketToken, Is.Null);
+            Assert.That(firstArray!.Index.CloseBracketToken, Is.Null);
             Assert.That(firstArray.Index.Expression, Is.InstanceOf<BinaryExpressionSyntax>());
             var indexBinary = (BinaryExpressionSyntax)firstArray.Index.Expression!;
             Assert.That(indexBinary.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
@@ -502,7 +502,7 @@ int identity(int value) {
             var secondArray = secondAssignment!.Right as ArrayExpressionSyntax;
             Assert.That(secondArray, Is.Not.Null);
             Assert.That(secondArray!.Index.Expression, Is.Null, "Index expression should be null when omitted");
-            Assert.That(secondArray.Index.RightBracketToken, Is.Null);
+            Assert.That(secondArray.Index.CloseBracketToken, Is.Null);
 
             var thirdStatement = block.Statements[2] as ExpressionStatementSyntax;
             Assert.That(thirdStatement, Is.Not.Null);
@@ -513,7 +513,7 @@ int identity(int value) {
             Assert.That(thirdRight!.Operator.Token.TokenKind, Is.EqualTo(TokenKind.Plus));
             var thirdArray = thirdRight.Left as ArrayExpressionSyntax;
             Assert.That(thirdArray, Is.Not.Null, "Complete index should still include right bracket");
-            Assert.That(thirdArray!.Index.RightBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
+            Assert.That(thirdArray!.Index.CloseBracketToken?.TokenKind, Is.EqualTo(TokenKind.RightBracket));
         });
     }
 

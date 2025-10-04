@@ -6,7 +6,7 @@ namespace SysyCompiler.Analyzer.Semantic;
 
 public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 {
-    public delegate void AnalyzeHandler<TValue>(TValue info, SemanticDiagnosticCollector diagnostics, ISymbolAnalyzer analyzer);
+    public delegate void AnalyzeHandler<TValue>(TValue info, ISymbolAnalyzer analyzer, SemanticDiagnosticCollector diagnostics);
 
     public SemanticDiagnosticCollector Diagnostics { get; }
 
@@ -30,17 +30,30 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitBlock(BlockSyntax node, T? val = default)
     {
+        val = node.OpenBraceToken.Accept(this);
+
         using (this.CreateScope())
         {
-            return base.VisitBlock(node, val);
+            AnalyzeBlock?.Invoke(node, this, Diagnostics);
+
+            val = node.Statements.Accept(this, val);
         }
+
+        return node.CloseBraceToken.Accept(this, val);
     }
 
     public override T? VisitFunctionDeclaration(FunctionDeclarationSyntax node, T? val = default)
     {
-        AnalyzeFunctionDeclaration?.Invoke(node, Diagnostics, this);
+        AnalyzeFunctionDeclaration?.Invoke(node, this, Diagnostics);
 
         return base.VisitFunctionDeclaration(node, val);
+    }
+
+    public override T? VisitVariableDeclaration(VariableDeclarationSyntax node, T? val = default)
+    {
+        AnalyzeVariableDeclaration?.Invoke(node, this, Diagnostics);
+
+        return base.VisitVariableDeclaration(node, val);
     }
 
     public override T? VisitVariableDefine(VariableDefineSyntax node, T? val = default)
@@ -50,7 +63,7 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
         if (declaration is VariableDeclarationSyntax variableDeclaration)
         {
-            AnalyzeVariableDeclaration?.Invoke((node, variableDeclaration), Diagnostics, this);
+            AnalyzeVariableDefine?.Invoke((node, variableDeclaration), this, Diagnostics);
         }
 
         return base.VisitVariableDefine(node, val);
@@ -58,53 +71,80 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitReferenceExpression(ReferenceExpressionSyntax node, T? val = default)
     {
-        AnalyzeReferenceUsage?.Invoke(node, Diagnostics, this);
+        AnalyzeReferenceUsage?.Invoke(node, this, Diagnostics);
         return base.VisitReferenceExpression(node, val);
     }
 
     public override T? VisitFunctionCallExpression(FunctionCallExpressionSyntax node, T? val = default)
     {
-        AnalyzeFunctionCall?.Invoke(node, Diagnostics, this);
+        AnalyzeFunctionCall?.Invoke(node, this, Diagnostics);
 
         return base.VisitFunctionCallExpression(node, val);
     }
 
     public override T? VisitControlFlowStatement(ControlFlowStatementSyntax node, T? val = default)
     {
-        AnalyzeControlFlowStatement?.Invoke(node, Diagnostics, this);
+        AnalyzeControlFlowStatement?.Invoke(node, this, Diagnostics);
 
         return base.VisitControlFlowStatement(node, val);
     }
 
     public override T? VisitLiteralExpression(LiteralExpressionSyntax node, T? val = default)
     {
-        AnalyzeLiteralExpression?.Invoke(node, Diagnostics, this);
+        AnalyzeLiteralExpression?.Invoke(node, this, Diagnostics);
 
         return base.VisitLiteralExpression(node, val);
     }
 
     public override T? VisitBinaryExpression(BinaryExpressionSyntax node, T? val = default)
     {
-        AnalyzeBinaryExpression?.Invoke(node, Diagnostics, this);
+        AnalyzeBinaryExpression?.Invoke(node, this, Diagnostics);
 
         return base.VisitBinaryExpression(node, val);
     }
 
     public override T? VisitReturnStatement(ReturnStatementSyntax node, T? val = default)
     {
-        AnalyzeReturnStatement?.Invoke(node, Diagnostics, this);
+        AnalyzeReturnStatement?.Invoke(node, this, Diagnostics);
 
         return base.VisitReturnStatement(node, val);
     }
 
     public override T? VisitArrayDimension(ArrayDimensionSyntax node, T? val = default)
     {
+        AnalyzeArrayDimension?.Invoke(node, this, Diagnostics);
+
         return base.VisitArrayDimension(node, val);
     }
 
+    public override T? VisitIfStatement(IfStatementSyntax node, T? val = default)
+    {
+        AnalyzeIfStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitIfStatement(node, val);
+    }
+
+    public override T? VisitWhileStatement(WhileStatementSyntax node, T? val = default)
+    {
+        AnalyzeWhileStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitWhileStatement(node, val);
+    }
+
+    public override T? VisitExpressionStatement(ExpressionStatementSyntax node, T? val = default)
+    {
+        AnalyzeExpressionStatement?.Invoke(node, this, Diagnostics);
+
+        return base.VisitExpressionStatement(node, val);
+    }
+
+    public event AnalyzeHandler<BlockSyntax>? AnalyzeBlock;
+
     public event AnalyzeHandler<FunctionDeclarationSyntax>? AnalyzeFunctionDeclaration;
 
-    public event AnalyzeHandler<(VariableDefineSyntax, VariableDeclarationSyntax)>? AnalyzeVariableDeclaration;
+    public event AnalyzeHandler<VariableDeclarationSyntax>? AnalyzeVariableDeclaration;
+
+    public event AnalyzeHandler<(VariableDefineSyntax, VariableDeclarationSyntax)>? AnalyzeVariableDefine;
 
     public event AnalyzeHandler<ReferenceExpressionSyntax>? AnalyzeReferenceUsage;
 
@@ -119,4 +159,10 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
     public event AnalyzeHandler<ReturnStatementSyntax>? AnalyzeReturnStatement;
 
     public event AnalyzeHandler<ArrayDimensionSyntax>? AnalyzeArrayDimension;
+
+    public event AnalyzeHandler<IfStatementSyntax>? AnalyzeIfStatement;
+
+    public event AnalyzeHandler<WhileStatementSyntax>? AnalyzeWhileStatement;
+
+    public event AnalyzeHandler<ExpressionStatementSyntax>? AnalyzeExpressionStatement;
 }

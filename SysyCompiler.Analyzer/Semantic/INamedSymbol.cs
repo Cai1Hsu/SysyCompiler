@@ -6,6 +6,8 @@ public interface INamedSymbol
 {
     public SyntaxToken Identifier { get; }
 
+    public ISymbolType Type { get; }
+
     public SyntaxNode Reference { get; }
 
     public SymbolKind Kind { get; }
