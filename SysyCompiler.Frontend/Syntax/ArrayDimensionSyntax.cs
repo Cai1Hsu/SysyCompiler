@@ -13,10 +13,10 @@ public class ArrayDimensionSyntax : SyntaxNode
 
     public override SyntaxKind Kind => SyntaxKind.ArrayDimension;
 
-    public ArrayDimensionSyntax(SyntaxToken leftBracketToken, SyntaxToken? rightBracketToken, ExpressionSyntax? expression = null)
+    public ArrayDimensionSyntax(SyntaxToken openBracketToken, SyntaxToken? closeBracketToken, ExpressionSyntax? expression = null)
     {
-        OpenBracketToken = leftBracketToken;
-        CloseBracketToken = rightBracketToken;
+        OpenBracketToken = openBracketToken;
+        CloseBracketToken = closeBracketToken;
         Expression = expression;
     }
 
