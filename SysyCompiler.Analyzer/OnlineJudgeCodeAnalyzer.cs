@@ -42,7 +42,7 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
             ?? i.OpenParenToken, i.CloseParenToken, a, d);
 
         // rule 'k'
-        AnalyzeFunctionDeclaration += (i, a, d) => ParenthesisCloseAnalysis(i.GetTokens().Last(), i.CloseParenToken, a, d);
+        AnalyzeArrayDimension += (i, a, d) => BracketCloseAnalysis(i.GetTokens().Last(), i.CloseBracketToken, a, d);
 
         // rule 'l'
         AnalyzeFunctionCall += PrintfArgumentAnalysis;
