@@ -377,8 +377,8 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
                 return new FunctionType(new PrimitiveType(PrimitiveTypeKind.Void));
 
             case ReferenceExpressionSyntax referenceExpression
-                when analyzer.ResolveGlobal(referenceExpression.Identifier.Text) is VariableSymbol variableSymbol:
-                return variableSymbol.Type;
+                when analyzer.ResolveGlobal(referenceExpression.Identifier.Text) is { } symbol:
+                return symbol.Type;
 
             default:
                 return null;
