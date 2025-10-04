@@ -195,13 +195,13 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
         if (info.ArgumentList.Items[0] is not ArgumentItemSyntax { Expression: LiteralExpressionSyntax formatString })
             return;
 
-        string? text = formatString.Token.RawText;
+        string text = formatString.Token.Text;
 
         // Collect count of arguments
 
         int formatCount = 0;
 
-        for (int i = 0; i < text?.Length; i++)
+        for (int i = 0; i < text.Length; i++)
         {
             if (text[i] == '%')
             {
