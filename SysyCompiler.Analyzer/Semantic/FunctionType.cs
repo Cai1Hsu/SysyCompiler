@@ -15,7 +15,9 @@ public class FunctionType : ScalarType
     }
 
     public override bool Equals(object? obj)
-        => obj is FunctionType other && other.ReturnType.Equals(ReturnType);
+        => obj is FunctionType other
+        && other.ReturnType.Equals(ReturnType)
+        && other.ParameterTypes.SequenceEqual(ParameterTypes);
 
     public override int GetHashCode()
     {
