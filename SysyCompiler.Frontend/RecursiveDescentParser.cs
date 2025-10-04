@@ -169,7 +169,7 @@ public partial class RecursiveDescentParser : ISyntaxParser
 
     public ArrayDimensionSyntax ParseArrayDimension()
     {
-        SyntaxToken leftBracketToken = ParseToken(TokenKind.LeftBracket);
+        SyntaxToken openBracketToken = ParseToken(TokenKind.LeftBracket);
 
         ExpressionSyntax? expression = null;
         if (!Source.IsMatch(0, TokenKind.RightBracket, // definitely close
@@ -178,11 +178,11 @@ public partial class RecursiveDescentParser : ISyntaxParser
             TokenKind.RightParen, TokenKind.RightBrace)) // TODO: keywords also indicates the missing close bracket
             expression = ParseExpression();
 
-        SyntaxToken? rightBracketToken = ParseNullableToken(TokenKind.RightBracket);
+        SyntaxToken? closeBracketToken = ParseNullableToken(TokenKind.RightBracket);
 
         return new ArrayDimensionSyntax(
-            leftBracketToken,
-            rightBracketToken,
+            openBracketToken,
+            closeBracketToken,
             expression
         );
     }
