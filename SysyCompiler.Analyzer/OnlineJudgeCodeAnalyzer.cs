@@ -202,19 +202,12 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
 
         var returns = info.Body.GetChildrenSubtree().OfType<ReturnStatementSyntax>();
 
-        if (!returns.Any())
+        if (info.Body.GetChildrenSubtree()
+            .OfType<ReturnStatementSyntax>()
+            .Any(r => r.Expression is not null))
         {
             diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.VoidFunctionWithReturnValue, info.Body.CloseBraceToken));
             return;
-        }
-
-        foreach (var returnStatement in returns)
-        {
-            if (returnStatement.Expression is not null)
-            {
-                diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.VoidFunctionWithReturnValue, info.Body.CloseBraceToken));
-                return;
-            }
         }
     }
 
