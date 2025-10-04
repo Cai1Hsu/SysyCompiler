@@ -107,6 +107,9 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
         // <char> -> <FormatChar> | <NormalChar>
         // <FormatString> → '"' {<Char>} '"'
 
+        if (info.Token.TokenKind is not TokenKind.StringLiteral)
+            return;
+
         string? text = info.Token.RawText;
 
         if (text is null || text.Length < 2) return;
@@ -145,7 +148,7 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
                     return;
                 }
             }
-            else if (content[i] < 32 || content[i] > 126)
+            else if (content[i] < 32 || content[i] > 126 || (33 < content[i] && content[i] < 40))
             {
                 diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.IllegalFormatStringCharacter, info.Token));
                 return;
