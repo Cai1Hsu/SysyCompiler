@@ -13,7 +13,16 @@ public static class IStackSyntaxVisitorExtensions
 
     public static TNode? GetClosest<TNode>(this IStackSyntaxVisitor visitor, Func<TNode, bool>? predicate = null, int searchLimit = int.MaxValue)
             where TNode : SyntaxNode
-            => visitor.AnalysisStack.Take(searchLimit).OfType<TNode>() is { } typeFiltered
-                ? predicate is null ? typeFiltered.FirstOrDefault() : typeFiltered.FirstOrDefault(predicate)
-                : throw new Exception(); // unreachable
+    {
+        var typeFiltered = visitor.AnalysisStack.Take(searchLimit).OfType<TNode>();
+
+        if (predicate is null)
+        {
+            return typeFiltered.FirstOrDefault();
+        }
+        else
+        {
+            return typeFiltered.FirstOrDefault(predicate);
+        }
+    }
 }
