@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using SysyCompiler.Frontend.Syntax;
 using SysyCompiler.Frontend.Tokenization;
 using static SysyCompiler.Analyzer.OnlineJudgeCodeAnalyzer;
@@ -23,14 +24,18 @@ public static class ISymbolTypeExtensions
         _ => null,
     };
 
-    public static ISymbolType? Parse(FunctionDeclarationSyntax functionDeclaration)
-        => Parse(functionDeclaration.ReturnType, arrayRank: 0, isFunction: true);
-
-    public static ISymbolType? Parse(TypeSyntax typeSyntax, int arrayRank = 0, bool isFunction = false)
+    public static FunctionType? Parse(FunctionDeclarationSyntax functionDeclaration, ImmutableArray<ISymbolType>? parameterTypes = null)
     {
-        if (typeSyntax is null)
+        var returnType = Parse(functionDeclaration.ReturnType, 0);
+
+        if (returnType is null)
             return null;
 
+        return new FunctionType(returnType, parameterTypes);
+    }
+
+    public static ISymbolType? Parse(TypeSyntax typeSyntax, int arrayRank = 0)
+    {
         ScalarType? baseType = typeSyntax.Token.TokenKind switch
         {
             TokenKind.Int => new PrimitiveType(PrimitiveTypeKind.Int),
@@ -43,8 +48,6 @@ public static class ISymbolTypeExtensions
         if (baseType is null)
             return null;
 
-        ISymbolType type = arrayRank > 0 ? new ArrayType(baseType, arrayRank) : baseType;
-
-        return isFunction ? new FunctionType(type) : type;
+        return arrayRank > 0 ? new ArrayType(baseType, arrayRank) : baseType;
     }
 }
