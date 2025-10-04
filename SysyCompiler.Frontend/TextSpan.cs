@@ -27,7 +27,7 @@ public readonly struct TextSpan
         int line = 1;
         int column = 1;
 
-        for (int i = 0; i < Start; i++)
+        for (int i = 0; i <= Start; i++)
         {
             if (text[i] == '\n')
             {
