@@ -391,21 +391,25 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
         if (analyzer.ResolveGlobal(info.Identifier.Text) is not VariableSymbol variableSymbol || variableSymbol.Kind is not SymbolKind.Constant)
             return;
 
-        bool onLeftSide = false;
+        bool onLeftSide = ReferenceEquals(info, assignExpression.Left);
 
-        // We must exclude cases where this reference is a part of a function arguments or array indices
-        foreach (var expr in assignExpression.Left.GetChildrenSubtree())
+        // Try to search if this reference is on the left side of the assignment expression
+        if (!onLeftSide)
         {
-            if (expr is FunctionCallExpressionSyntax functionCall && functionCall.ArgumentList.GetChildrenSubtree().Contains(info))
-                return;
-
-            if (expr is ArrayExpressionSyntax arrayAccess && arrayAccess.Index.GetChildrenSubtree().Contains(info))
-                return;
-
-            if (ReferenceEquals(info, expr))
+            // We must exclude cases where this reference is a part of a function arguments or array indices
+            foreach (var expr in assignExpression.Left.GetChildrenSubtree())
             {
-                onLeftSide = true;
-                break;
+                if (expr is FunctionCallExpressionSyntax functionCall && functionCall.ArgumentList.GetChildrenSubtree().Contains(info))
+                    return;
+
+                if (expr is ArrayExpressionSyntax arrayAccess && arrayAccess.Index.GetChildrenSubtree().Contains(info))
+                    return;
+
+                if (ReferenceEquals(info, expr))
+                {
+                    onLeftSide = true;
+                    break;
+                }
             }
         }
 
