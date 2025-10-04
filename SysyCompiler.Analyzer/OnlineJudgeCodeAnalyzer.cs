@@ -14,8 +14,8 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
         AnalyzeLiteralExpression += FormatStringAnalysis;
 
         // rule 'b'
-        AnalyzeFunctionDeclaration += (i, a, d) => IdentifierRedefinedAnalysis(i.Identifier, a, d);
-        AnalyzeVariableDefine += (i, a, d) => IdentifierRedefinedAnalysis(i.Item1.Identifier, a, d);
+        AnalyzeFunctionDeclaration += (i, a, d) => DeclareSymbol(new FunctionSymbol(i), a, d);
+        AnalyzeVariableDefine += (i, a, d) => DeclareSymbol(new VariableSymbol(i.Item2, i.Item1), a, d);
 
         // rule 'c'
         AnalyzeReferenceUsage += UndefinedReferenceAnalysis;
@@ -104,11 +104,12 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
         }
     }
 
-    public static void IdentifierRedefinedAnalysis(SyntaxToken identifier, ISymbolAnalyzer analyzer, SemanticDiagnosticCollector diagnostics)
+    public static void DeclareSymbol(INamedSymbol symbol, ISymbolAnalyzer analyzer, SemanticDiagnosticCollector diagnostics)
     {
-        if (analyzer.ResolveLocal(identifier.Text) is not null)
+        // Required to be local scope
+        if (analyzer.CurrentScope?.TryDeclare(symbol) is false)
         {
-            diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.IdentifierRedefined, identifier));
+            diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.IdentifierRedefined, symbol.Identifier));
         }
     }
 
