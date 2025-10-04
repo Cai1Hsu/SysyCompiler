@@ -257,9 +257,9 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
 
         if (info.Body.GetChildrenSubtree()
             .OfType<ReturnStatementSyntax>()
-            .Any(r => r.Expression is not null))
+            .FirstOrDefault(r => r.Expression is not null) is ReturnStatementSyntax returnStatement)
         {
-            diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.VoidFunctionWithReturnValue, info.Body.CloseBraceToken));
+            diagnostics.Add(new SemanticDiagnostic(SemanticErrorKind.VoidFunctionWithReturnValue, returnStatement.ReturnKeyword));
             return;
         }
     }
