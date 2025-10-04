@@ -17,5 +17,12 @@ public class FunctionType : ScalarType
     public override bool Equals(object? obj)
         => obj is FunctionType other && other.ReturnType.Equals(ReturnType);
 
-    public override int GetHashCode() => HashCode.Combine(ReturnType);
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(ReturnType);
+        foreach (var paramType in ParameterTypes)
+            hash.Add(paramType);
+        return hash.ToHashCode();
+    }
 }
