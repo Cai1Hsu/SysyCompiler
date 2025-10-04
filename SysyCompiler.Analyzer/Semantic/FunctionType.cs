@@ -1,3 +1,4 @@
+using System.Text;
 using System.Collections.Immutable;
 
 namespace SysyCompiler.Analyzer.Semantic;
@@ -12,6 +13,22 @@ public class FunctionType : ScalarType
     {
         ReturnType = returnType;
         ParameterTypes = parameterTypes ?? ImmutableArray<ISymbolType>.Empty;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder(ReturnType.ToString());
+        sb.Append('(');
+
+        for (var i = 0; i < ParameterTypes.Length; i++)
+        {
+            if (i > 0)
+                sb.Append(", ");
+            sb.Append(ParameterTypes[i].ToString());
+        }
+
+        sb.Append(')');
+        return sb.ToString();
     }
 
     public override bool Equals(object? obj)

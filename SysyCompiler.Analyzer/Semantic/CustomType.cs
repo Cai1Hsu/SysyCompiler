@@ -7,6 +7,8 @@ public class CustomType(SyntaxToken identifier) : ScalarType
 {
     public SyntaxToken Identifier { get; } = identifier;
 
+    public override string ToString() => Identifier.Text;
+
     public override bool Equals(object? obj)
         => obj is CustomType other && other.Identifier.Text == Identifier.Text;
 

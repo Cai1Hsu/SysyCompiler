@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace SysyCompiler.Analyzer.Semantic;
 
 public class ArrayType : ISymbolType
@@ -10,6 +12,16 @@ public class ArrayType : ISymbolType
     {
         ElementType = elementType;
         ArrayRank = arrayRank;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder(ElementType.ToString());
+
+        for (var i = 0; i < ArrayRank; i++)
+            sb.Append("[]");
+
+        return sb.ToString();
     }
 
     public override bool Equals(object? obj)
