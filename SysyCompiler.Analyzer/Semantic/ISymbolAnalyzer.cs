@@ -9,7 +9,7 @@ public interface ISymbolAnalyzer: IStackSyntaxVisitor
 
     public SymbolScope? CurrentScope => Scopes.Count > 0 ? Scopes.Peek() : null;
 
-    struct SymbolScopeGuard : IDisposable
+    ref struct SymbolScopeGuard : IDisposable
     {
         private readonly ISymbolAnalyzer analyzer;
 
