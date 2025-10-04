@@ -30,10 +30,16 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
     public override T? VisitBlock(BlockSyntax node, T? val = default)
     {
+        val = node.OpenBraceToken.Accept(this);
+
         using (this.CreateScope())
         {
-            return base.VisitBlock(node, val);
+            AnalyzeBlock?.Invoke(node, this, Diagnostics);
+
+            val = node.Statements.Accept(this, val);
         }
+
+        return node.CloseBraceToken.Accept(this, val);
     }
 
     public override T? VisitFunctionDeclaration(FunctionDeclarationSyntax node, T? val = default)
@@ -131,6 +137,8 @@ public class SymbolAnalyzer<T> : StackSyntaxVisitor<T>, ISymbolAnalyzer
 
         return base.VisitExpressionStatement(node, val);
     }
+
+    public event AnalyzeHandler<BlockSyntax>? AnalyzeBlock;
 
     public event AnalyzeHandler<FunctionDeclarationSyntax>? AnalyzeFunctionDeclaration;
 
