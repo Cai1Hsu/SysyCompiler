@@ -188,9 +188,12 @@ public partial class RecursiveDescentParser
                 break;
             }
 
-            // Close grouped expression
-            if (Source.IsMatch(0, TokenKind.RightParen))
-                break;
+            // Close grouped expression, or definitely a missing close bracket
+            for (int i = 0; i < 2; i++)
+            {
+                if (Source.IsMatch(i, TokenKind.RightParen, TokenKind.LeftBrace, TokenKind.Semicolon))
+                    return left;
+            }
 
             // This usually indicates the end of an expression
             if (ParseBinaryOperatorSyntax() is not BinaryOperatorSyntax operatorToken)
