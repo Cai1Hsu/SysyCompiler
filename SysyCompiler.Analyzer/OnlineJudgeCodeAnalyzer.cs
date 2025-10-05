@@ -363,7 +363,7 @@ public class OnlineJudgeCodeAnalyzer : SymbolAnalyzer<object>
                     goto default; // not a array
 
                 if (arrayType.ArrayRank == 1)
-                    return baseType; // unbox to element type
+                    return arrayType.ElementType; // unbox to element type
                 else
                     // flatten the array access
                     return new ArrayType(arrayType.ElementType, arrayType.ArrayRank - 1);
